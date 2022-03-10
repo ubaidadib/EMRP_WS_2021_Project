@@ -1,6 +1,8 @@
 ====== Environmental Monitoring Research Project 2021 ======
 
 
+[embed]https://drive.google.com/file/d/1YO7xjj5tSKnOfFExcEUzSbyBDddfpjpN/view?usp=sharing[/embed]
+
 ===== 1. Problem description =====
 
 The city of Moers has bought a lot of new trash bins. In order to be able to monitor the filling level of these trash bins, the trash bins have to be equipped with appropriate hardware and software. This project can be seen as a first prototype which goes through the whole process from the collection of the data to the storage and visualization of the data. We use technologies that are also known from the smart city context.
@@ -11,7 +13,7 @@ For our project, we have used LoRaWAN (Low-power wide-area-network), MQTT (MQ Te
 \\
 Before we can describe what is LoRaWAN first we need to understand what is LoRa. LoRa is a radio modulation technique that is essentially a way of manipulating radio waves to encode information using a chirped (chirp spread spectrum technology), multi-symbol format. LoRa as a term can also refer to the systems that support this modulation technique or the communication network that IoT applications use.\\
 \\
-{{:emrp2021:mqtt1.jpg?400|}}\\
+
 |//Figure 1: MQTT & LoRaWan //|
 \\
 The main advantages of LoRa are its long-range capability and its affordability. A typical use case for LoRa is in smart cities, where low-powered and inexpensive internet of things devices (typically sensors or monitors) spread across a large area send small packets of data sporadically to a central administrator.LoRaWAN is a low-power, wide-area networking protocol built on top of the LoRa radio modulation technique. It wirelessly connects devices to the internet and manages communication between end-node devices and network gateways. The usage of LoRaWAN in industrial spaces and smart cities is growing because it is an affordable long-range, bi-directional communication protocol with very low power consumption — devices can run for ten years on a small battery. It uses the unlicensed ISM (Industrial, Scientific, Medical) radio bands for network deployments.
