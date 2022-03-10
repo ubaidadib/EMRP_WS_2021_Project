@@ -1,0 +1,2 @@
+# EMRP_WS_2021_Project
+The city of Moers has bought a lot of new trash bins. In order to be able to monitor the filling level of these trash bins, the trash bins have to be equipped with appropriate hardware and software. This project can be seen as a first prototype which goes through the whole process from the collection of the data to the storage and visualization of the data. We use technologies that are also known from the smart city context.
