@@ -1,0 +1,14 @@
+-- Table: public.ta_node
+
+-- DROP TABLE public.ta_node;
+
+CREATE TABLE IF NOT EXISTS public.ta_node
+(
+    dev_eui character(16) COLLATE pg_catalog."default" NOT NULL,
+    bin_id bigint,
+    CONSTRAINT node_pkey PRIMARY KEY (dev_eui),
+    CONSTRAINT fk_trashbin FOREIGN KEY (bin_id)
+        REFERENCES public.ta_trashbin (bin_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);

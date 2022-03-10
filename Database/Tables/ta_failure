@@ -1,0 +1,15 @@
+-- Table: public.ta_failure
+
+-- DROP TABLE public.ta_failure;
+
+CREATE TABLE IF NOT EXISTS public.ta_failure
+(
+    dev_eui character(16) COLLATE pg_catalog."default" NOT NULL,
+    time_gateway timestamp with time zone NOT NULL,
+    channel character(16) COLLATE pg_catalog."default" NOT NULL,
+    msg_id text COLLATE pg_catalog."default",
+    application_id text COLLATE pg_catalog."default",
+    measurement real,
+    insert_time timestamp with time zone DEFAULT now(),
+    CONSTRAINT ta_failure_pkey PRIMARY KEY (dev_eui, time_gateway, channel)
+);

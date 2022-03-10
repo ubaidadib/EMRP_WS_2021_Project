@@ -1,0 +1,23 @@
+-- Table: public.ta_measurement
+
+-- DROP TABLE public.ta_measurement;
+
+CREATE TABLE IF NOT EXISTS public.ta_measurement
+(
+    dev_eui character(16) COLLATE pg_catalog."default" NOT NULL,
+    time_gateway timestamp with time zone NOT NULL,
+    channel character(16) COLLATE pg_catalog."default" NOT NULL,
+    msg_id text COLLATE pg_catalog."default",
+    application_id text COLLATE pg_catalog."default",
+    measurement real,
+    CONSTRAINT meas_pkey PRIMARY KEY (dev_eui, time_gateway, channel),
+    CONSTRAINT fkey_connec FOREIGN KEY (time_gateway, msg_id)
+        REFERENCES public.ta_connection (time_gateway, msg_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT fkey_node FOREIGN KEY (dev_eui)
+        REFERENCES public.ta_node (dev_eui) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+);

@@ -1,0 +1,13 @@
+-- Table: public.ta_trashbin
+
+-- DROP TABLE public.ta_trashbin;
+
+CREATE TABLE IF NOT EXISTS public.ta_trashbin
+(
+    bin_id bigint NOT NULL,
+    latitude double precision,
+    longitude double precision,
+    number_of_container numeric,
+    place text COLLATE pg_catalog."default",
+    CONSTRAINT trashbin_pkey PRIMARY KEY (bin_id)
+);

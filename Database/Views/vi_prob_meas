@@ -1,0 +1,39 @@
+-- View: public.vi_prob_meas
+
+-- DROP VIEW public.vi_prob_meas;
+
+CREATE OR REPLACE VIEW public.vi_prob_meas
+ AS
+ WITH last_meas_pro_channel AS (
+         SELECT nd.bin_id,
+            ( SELECT ta_trashbin.longitude
+                   FROM ta_trashbin
+                  WHERE ta_trashbin.bin_id = nd.bin_id) AS longitude,
+            ( SELECT ta_trashbin.latitude
+                   FROM ta_trashbin
+                  WHERE ta_trashbin.bin_id = nd.bin_id) AS latitude,
+            tf.dev_eui,
+            tf.channel,
+            max(tf.time_gateway) AS last_date,
+            (( SELECT count(DISTINCT ta_measurement.channel) AS count
+                   FROM ta_measurement)) - (( SELECT count(ta_measurement.channel) AS count
+                   FROM ta_measurement
+                  WHERE ta_measurement.time_gateway = max(tf.time_gateway) AND ta_measurement.dev_eui = tf.dev_eui
+                  GROUP BY ta_measurement.time_gateway)) AS number_of_missing_sensors
+           FROM ta_failure tf
+             JOIN ta_node nd ON nd.dev_eui = tf.dev_eui
+          GROUP BY tf.dev_eui, tf.channel, nd.bin_id
+        )
+ SELECT lm.bin_id,
+    lm.longitude,
+    lm.latitude,
+    lm.dev_eui,
+    lm.channel,
+    lm.last_date,
+    lm.number_of_missing_sensors,
+    tm.measurement
+   FROM ta_measurement tm
+     JOIN last_meas_pro_channel lm ON lm.dev_eui = tm.dev_eui AND lm.last_date = tm.time_gateway AND lm.channel = tm.channel;
+
+
+

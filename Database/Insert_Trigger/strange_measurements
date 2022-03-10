@@ -1,0 +1,34 @@
+CREATE OR REPLACE FUNCTION update_strange_measurements()
+    RETURNS TRIGGER AS
+$$
+DECLARE
+ sensor_count integer   :=  (select count(distinct(channel)) from public.ta_measurement);
+ act_sensor_dev integer := (select count(channel) from ta_measurement where time_gateway = NEW.time_gateway and dev_eui = NEW.dev_eui group by NEW.time_gateway);
+BEGIN 
+ If (NEW.MEASUREMENT IS NULL)  THEN
+ Insert into public.ta_failure (dev_eui, time_gateway, channel, msg_id, application_id, measurement) 
+                            values (NEW.dev_eui, NEW.time_gateway, NEW.channel,NEW.msg_id
+                           ,NEW.application_id, NEW.measurement);
+						   
+PERFORM pg_sleep(0.8);
+elsif sensor_count>act_sensor_dev
+then Insert into public.ta_failure (dev_eui, time_gateway, channel, msg_id, application_id, measurement) 
+                            values (NEW.dev_eui, NEW.time_gateway, NEW.channel,NEW.msg_id
+                           ,NEW.application_id, NEW.measurement);
+END IF;
+
+If ((NEW.MEASUREMENT IS NOT NULL))  AND (sensor_count=act_sensor_dev)  THEN
+ Delete from public.ta_failure where dev_eui = NEW.dev_eui;
+END IF;
+
+RETURN NEW;						  
+END;
+
+
+$$
+LANGUAGE 'plpgsql';
+
+CREATE TRIGGER strange_measurements 
+   AFTER INSERT ON ta_measurement
+   FOR EACH ROW
+   EXECUTE PROCEDURE update_strange_measurements();

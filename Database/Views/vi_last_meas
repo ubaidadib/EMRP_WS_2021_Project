@@ -1,0 +1,28 @@
+-- View: public.vi_last_meas
+
+-- DROP VIEW public.vi_last_meas;
+
+CREATE OR REPLACE VIEW public.vi_last_meas
+ AS
+ WITH last_meas AS (
+         SELECT ta_measurement.dev_eui,
+            max(ta_measurement.time_gateway) AS last_date
+           FROM ta_measurement
+          WHERE ta_measurement.channel = 'distance'::bpchar
+          GROUP BY ta_measurement.dev_eui, ta_measurement.channel
+        )
+ SELECT tb.bin_id,
+    tb.longitude,
+    tb.latitude,
+    last_meas.dev_eui,
+    last_meas.last_date,
+    tm.channel,
+    tm.measurement
+   FROM ta_measurement tm
+     JOIN last_meas ON last_meas.dev_eui = tm.dev_eui AND last_meas.last_date = tm.time_gateway
+     JOIN ta_node nd ON last_meas.dev_eui = nd.dev_eui
+     JOIN ta_trashbin tb ON nd.bin_id = tb.bin_id
+  WHERE tm.channel = 'distance'::bpchar;
+
+
+

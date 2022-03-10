@@ -1,0 +1,353 @@
+[
+    {
+        "id": "3892a11ef5695dbd",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": "no_measurement",
+        "func": "if ((typeof msg.payload.uplink_message.decoded_payload.tempmm == 'undefined'&& msg.payload.uplink_message.decoded_payload.tempmm == null) \n||(typeof msg.payload.uplink_message.decoded_payload.distancemm === 'undefined'&& msg.payload.uplink_message.decoded_payload.distancemm === null)){\nvar dev_eui = msg.payload.end_device_ids.dev_eui;\nvar time    = msg.payload.uplink_message.rx_metadata[0].time;\nvar channel = \"temperature\";\nvar msg_id = msg._msgid;\nvar app_id = msg.payload.end_device_ids.application_ids.application_id;\nvar measurement = msg.payload.uplink_message.decoded_payload.distancemm;\n\nmsg.params = [ dev_eui,time,msg_id,topic,app_id,measurement ];\n            //dev_eui,time_gateway,channel,application_id,distance,rssi,channel_rssi,snr,gateway_id,gateway_eui,bandwidth,spreading_factor,coding_rate,consumed_airtime\nreturn msg;}\n\nelse{\n    msg = null;\n    return msg;\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 540,
+        "wires": [
+            [
+                "06d5101e5171b606"
+            ]
+        ]
+    },
+    {
+        "id": "4133599cbbf10a98",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": "get_connection_data_db",
+        "func": "var msg_id = msg._msgid;//\"02\"//\nvar gateway_id = msg.payload.gateway_ids.gateway_id;\nvar gateway_eui = msg.payload.gateway_ids.eui;\nvar rssi  = msg.payload.rssi;\nvar channel_rssi = msg.payload.channel_rssi;\nvar snr = msg.payload.snr;\n\nvar time = msg.payload.time;\n\n\n\nmsg.payload = [msg_id,gateway_id,gateway_eui,time,rssi,channel_rssi,snr];\nmsg.topic = \"connection\";\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 140,
+        "wires": [
+            [
+                "85226ff7262b5478"
+            ]
+        ]
+    },
+    {
+        "id": "8493e4c9899c58df",
+        "type": "postgresql",
+        "z": "080c6a0959f5a776",
+        "name": "store_connection_data",
+        "query": "Insert into ta_connection values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);",
+        "postgreSQLConfig": "d9699211bcfc9c6e",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 1160,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ca968d382fab6aa0",
+        "type": "debug",
+        "z": "080c6a0959f5a776",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "85226ff7262b5478",
+        "type": "join",
+        "z": "080c6a0959f5a776",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": true,
+        "timeout": "",
+        "count": "2",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 970,
+        "y": 340,
+        "wires": [
+            [
+                "961a3aa6b4eb028a"
+            ]
+        ]
+    },
+    {
+        "id": "961a3aa6b4eb028a",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": "parameter_DB",
+        "func": "//msg.payload = msg.payload.transmission;\n//msg.payload = msg.payload.connection;\nmsg.params=[msg.payload.connection[0],msg.payload.connection[1]\n           ,msg.payload.connection[2],msg.payload.connection[3]\n           ,msg.payload.connection[4],msg.payload.connection[5]\n           ,msg.payload.connection[6]\n           ,msg.payload.transmission[0],msg.payload.transmission[1]\n           ,msg.payload.transmission[2],msg.payload.transmission[3]\n           ,msg.payload.transmission[4]];\nreturn msg;\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1160,
+        "y": 340,
+        "wires": [
+            [
+                "8493e4c9899c58df",
+                "ca968d382fab6aa0"
+            ]
+        ]
+    },
+    {
+        "id": "0c02da1bb3bccc3a",
+        "type": "mqtt in",
+        "z": "080c6a0959f5a776",
+        "name": "",
+        "topic": "v3/+/devices/+/up",
+        "qos": "2",
+        "datatype": "json",
+        "broker": "66b60ab5a7e248c3",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "x": 320,
+        "y": 300,
+        "wires": [
+            [
+                "82c8a6d2f55b35a8",
+                "a34a357b500dd67b",
+                "e539bdd8c13e63d9",
+                "765fe895e0feda84",
+                "8ee0214bc97f241b",
+                "3892a11ef5695dbd"
+            ]
+        ]
+    },
+    {
+        "id": "5039462afded2a20",
+        "type": "split",
+        "z": "080c6a0959f5a776",
+        "name": "",
+        "splt": "/",
+        "spltType": "str",
+        "arraySplt": "1",
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 770,
+        "y": 140,
+        "wires": [
+            [
+                "4133599cbbf10a98"
+            ]
+        ]
+    },
+    {
+        "id": "8ee0214bc97f241b",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": "get_temp_meas",
+        "func": "if (typeof msg.payload.uplink_message.decoded_payload.tempmm != 'undefined'&& msg.payload.uplink_message.decoded_payload.tempmm !== null){\nvar dev_eui = msg.payload.end_device_ids.dev_eui;\nvar time    = msg.payload.uplink_message.rx_metadata[0].time;\nvar channel = \"temperature\";\nvar msg_id = msg._msgid;\nvar app_id = msg.payload.end_device_ids.application_ids.application_id;\nvar measurement = msg.payload.uplink_message.decoded_payload.tempmm;\n\nmsg.params = [ dev_eui,time,channel,msg_id,app_id,measurement ];\n            //dev_eui,time_gateway,channel,application_id,distance,rssi,channel_rssi,snr,gateway_id,gateway_eui,bandwidth,spreading_factor,coding_rate,consumed_airtime\nreturn msg;}\n\nelse{\n    msg = null;\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 480,
+        "wires": [
+            [
+                "06d5101e5171b606"
+            ]
+        ]
+    },
+    {
+        "id": "e539bdd8c13e63d9",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": "transmission_data",
+        "func": "var msg1 = {payload: \"payload_value\", topic: \"transmission\"};\nvar bandwidth = msg.payload.uplink_message.settings.data_rate.lora.bandwidth;\nvar spre_factor = msg.payload.uplink_message.settings.data_rate.lora.spreading_factor;\nvar code_rate =  msg.payload.uplink_message.settings.coding_rate;\nvar air_time = msg.payload.uplink_message.consumed_airtime;\nvar topic = \"v3/+/devices/+/up\"//msg.topic;\nmsg1.payload = [bandwidth,spre_factor,code_rate,air_time,topic];\n//msg1.params= [bandwidth];\nreturn msg1;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 340,
+        "wires": [
+            [
+                "85226ff7262b5478"
+            ]
+        ]
+    },
+    {
+        "id": "765fe895e0feda84",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": "get_distance",
+        "func": "if (typeof msg.payload.uplink_message.decoded_payload.distancemm != 'undefined' && msg.payload.uplink_message.decoded_payload.distancemm !== null){\nvar dev_eui = msg.payload.end_device_ids.dev_eui;\nvar time    = msg.payload.uplink_message.rx_metadata[0].time;\nvar channel = \"distance\";\nvar msg_id = msg._msgid;\nvar app_id = msg.payload.end_device_ids.application_ids.application_id;\nvar measurement = msg.payload.uplink_message.decoded_payload.distancemm;\n\nmsg.params = [ dev_eui,time,channel,msg_id,app_id,measurement ];\nreturn msg;}\n\nelse{\n    msg = null;\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 420,
+        "wires": [
+            [
+                "06d5101e5171b606"
+            ]
+        ]
+    },
+    {
+        "id": "06d5101e5171b606",
+        "type": "postgresql",
+        "z": "080c6a0959f5a776",
+        "name": "",
+        "query": "Insert into ta_measurement values($1,$2,$3,$4,$5,$6)",
+        "postgreSQLConfig": "d9699211bcfc9c6e",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 850,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "82c8a6d2f55b35a8",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": " more_than_1_gatew",
+        "func": "\nif(msg.payload.uplink_message.rx_metadata.length>1){\n    msg.payload = msg.payload.uplink_message.rx_metadata;\nreturn msg;\n}\nelse{\n    msg = null;\n    return msg;\n    \n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 140,
+        "wires": [
+            [
+                "5039462afded2a20"
+            ]
+        ]
+    },
+    {
+        "id": "a34a357b500dd67b",
+        "type": "function",
+        "z": "080c6a0959f5a776",
+        "name": "1_gateway",
+        "func": "\nif(msg.payload.uplink_message.rx_metadata.length == 1){\n    \nvar msg_id = msg._msgid //\"03\";\nvar gateway_id=msg.payload.uplink_message.rx_metadata[0].gateway_ids.gateway_id;\nvar gateway_eui = msg.payload.uplink_message.rx_metadata[0].gateway_ids.eui;\nvar rssi  = msg.payload.uplink_message.rx_metadata[0].rssi;\nvar channel_rssi = msg.payload.uplink_message.rx_metadata[0].channel_rssi;\nvar snr = msg.payload.uplink_message.rx_metadata[0].snr;\n\nvar bandwidth = msg.payload.uplink_message.settings.data_rate.lora.bandwidth;\nvar spre_factor = msg.payload.uplink_message.settings.data_rate.lora.spreading_factor;\nvar code_rate =  msg.payload.uplink_message.settings.coding_rate;\nvar air_time = msg.payload.uplink_message.consumed_airtime;\nvar topic = \"v3/+/devices/+/up\"//msg.topic;\nvar time    = msg.payload.uplink_message.rx_metadata[0].time;\n\nmsg.params = [msg_id,gateway_id,gateway_eui,time,rssi,channel_rssi,snr,bandwidth,spre_factor,code_rate,air_time,topic];\nmsg.topic = \"connection\";\nreturn msg;\n}\nelse{\n    msg = null;\n    return msg;\n    \n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 220,
+        "wires": [
+            [
+                "8493e4c9899c58df"
+            ]
+        ]
+    },
+    {
+        "id": "94a5a0487d3e3eea",
+        "type": "inject",
+        "z": "080c6a0959f5a776",
+        "name": "multiple_gateways",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"end_device_ids\":{\"device_id\":\"eui-70b3d57ed004996e\",\"application_ids\":{\"application_id\":\"testfirstsensor\"},\"dev_eui\":\"70B3D57ED004996E\",\"join_eui\":\"0000000000000000\",\"dev_addr\":\"260B1C90\"},\"correlation_ids\":[\"as:up:01FSS44RA7YT74ZAGDVRPDAJ5A\",\"gs:conn:01FS4FCWNZAGWSTF36Q5NP412A\",\"gs:up:host:01FS4FCWP6QVT289JS5MNKR44A\",\"gs:uplink:01FSS44R3PVMPPVX52SQK74EPF\",\"ns:uplink:01FSS44R3QDVE88E142KA2H0ZE\",\"rpc:/ttn.lorawan.v3.GsNs/HandleUplink:01FSS44R3Q36WVAG5QRK9J9MR3\",\"rpc:/ttn.lorawan.v3.NsAs/HandleUplink:01FSS44RA6EJKGR5KBJEMSMNQ6\"],\"received_at\":\"2000-01-19T12:14:19.977146628Z\",\"uplink_message\":{\"session_key_id\":\"AX5x5YtOBiadRy0oSJ7fvg==\",\"f_port\":1,\"f_cnt\":139,\"frm_payload\":\"AA8=\",\"decoded_payload\":{\"tempmm\":21.9},\"rx_metadata\":[{\"gateway_ids\":{\"gateway_id\":\"draginogw-iotlab-007\",\"eui\":\"A84041FFFF1F9D54\"},\"time\":\"2022-02-19T12:14:45.122Z\",\"timestamp\":1063755035,\"rssi\":-58,\"channel_rssi\":-58,\"snr\":9,\"uplink_token\":\"CiIKIAoUZHJhZ2lub2d3LWlvdGxhYi0wMDYSCKhAQf//H51UEJu6nvsDGgwIm4GgjwYQ/quj7QIg+OL25fq4ngEqCwi1gaCPBhCApZY6\"},{\"gateway_ids\":{\"gateway_id\":\"draginogw-iotlab-667\",\"eui\":\"A84041FFFF1F9DDD\"},\"time\":\"2022-01-19T12:14:45.122Z\",\"timestamp\":1063755035,\"rssi\":-55,\"channel_rssi\":-55,\"snr\":5,\"uplink_token\":\"CiIKIAo\"},{\"gateway_ids\":{\"gateway_id\":\"draginogw-iotlab-990\",\"eui\":\"A84041FFFF1F9DDD\"},\"time\":\"2022-01-19T12:14:45.122Z\",\"timestamp\":1063755035,\"rssi\":-55,\"channel_rssi\":-55,\"snr\":5,\"uplink_token\":\"CiIKIAo\"}],\"settings\":{\"data_rate\":{\"lora\":{\"bandwidth\":125000,\"spreading_factor\":7}},\"coding_rate\":\"4/5\",\"frequency\":\"868100000\",\"timestamp\":1063755035,\"time\":\"2022-01-19T12:14:45.122Z\"},\"received_at\":\"2022-01-19T12:14:19.767797884Z\",\"consumed_airtime\":\"0.046336s\",\"network_ids\":{\"net_id\":\"000013\",\"tenant_id\":\"ttn\",\"cluster_id\":\"ttn-eu1\"}}}",
+        "payloadType": "json",
+        "x": 130,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d9699211bcfc9c6e",
+        "type": "postgreSQLConfig",
+        "name": "PB",
+        "host": "",
+        "hostFieldType": "str",
+        "port": "5432",
+        "portFieldType": "num",
+        "database": "",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "max": "10",
+        "maxFieldType": "num",
+        "min": "1",
+        "minFieldType": "num",
+        "idle": "1000",
+        "idleFieldType": "num",
+        "connectionTimeout": "10000",
+        "connectionTimeoutFieldType": "num",
+        "user": "",
+        "userFieldType": "str",
+        "password": "",
+        "passwordFieldType": "str"
+    },
+    {
+        "id": "66b60ab5a7e248c3",
+        "type": "mqtt-broker",
+        "name": "ttn_brocker",
+        "broker": "eu1.cloud.thethings.network",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    }
+]
